@@ -1,0 +1,87 @@
+# coupling.graph.yaml — mushochika ⇄ mimicme 関係グラフ（機械可読版）
+# 人間用の説明は coupling.md。本ファイルは nodes / edges のみが正。
+# 更新時は coupling.md の図と一致させること。
+
+graph:
+  name: mushochika-mimicme-coupling
+  schema: 1
+  updated: 2026-09-07
+
+  nodes:
+    - id: prompts_db
+      label: prompts.db
+      kind: data
+      role: 全プロンプト履歴（唯一の共有物・外部所有・生成物）
+      owner: external
+      path: ~/repo/data/prompts.db
+      access: ro            # 両者とも読み取り専用
+    - id: mimicme
+      label: mimicme
+      kind: tool
+      role: ML学習（モデル構築・保存）
+      owner: mimicme
+      path: ~/.opencode/skills/mimicme/
+    - id: models
+      label: models/
+      kind: artifact
+      role: 学習済みモデル（scaler + kmeans）
+      owner: mimicme
+      path: ~/.opencode/skills/mimicme/models/
+      access: ro            # copyrobot のみ参照可
+    - id: copyrobot
+      label: copyrobot
+      kind: tool
+      role: 振る舞い（モデルを読むだけ。学習しない）
+      owner: ore-copy
+      path: ~/repo/ore-copy/copyrobot.py
+    - id: md_output
+      label: md出力
+      kind: artifact
+      role: copyrobot の生成物（数字・振り返り・スピーチ）
+      owner: copyrobot
+      path: copyrobot 生成物（ore-copy 側）
+    - id: mushochika
+      label: mushochika
+      kind: repo
+      role: md を受け取り FACTS / スピーチへ束ねる（末端）
+      owner: mushochika
+      path: ~/repo/mushochika/
+
+  edges:
+    # 学習フロー
+    - from: prompts_db
+      to: mimicme
+      rel: feeds            # 学習データ
+      access: ro
+    - from: mimicme
+      to: models
+      rel: persists         # 学習結果を保存
+      access: write
+    # 振る舞いフロー
+    - from: models
+      to: copyrobot
+      rel: read_by          # モデルを読むだけ
+      access: ro
+    - from: prompts_db
+      to: copyrobot
+      rel: sources          # reflect/集計の元データ
+      access: ro
+    - from: copyrobot
+      to: md_output
+      rel: generates
+      access: write
+    # mushochika 側（受け取り専用）
+    - from: md_output
+      to: mushochika
+      rel: delivered_to
+      access: read
+    - from: prompts_db
+      to: mushochika
+      rel: verified_by      # FACTS 検証コマンド（sqlite）
+      access: ro
+
+  invariants:               # 境界ルールの機械可読要約（詳細は coupling.md）
+    - direct_edge_between_mimicme_and_mushochika: none
+    - only_shared_object: prompts_db
+    - interface: files_only
+    - lifecycle: isolated   # 再学習しても md は不変
