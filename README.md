@@ -1,12 +1,125 @@
 # bonsai/mushochika
 
-## 無尽知化 — 求人・仕事を「知識の成長」に変える
+## 無尽知化 — Vibe Coding × Agent Construction × Ontology Design
 
-`mushochika` は、求人票を単なる募集文書としてではなく、**仕事・現場・道具・知識・経験を構造化するための資料**として扱うためのリポジトリです。
+`mushochika` は、求人・仕事・経験を、**知識・Ontology・Agentへ変換していくための求人資料基盤**です。
 
-求人から読み取れる「何をするか」「何が必要か」「何を学べるか」を整理し、仕事を起点に知識を増やしていきます。
+## 積み上げてきた職能
+
+### 1. Vibe Coding
+
+AIとの対話を開発プロセスそのものに組み込み、実際に動くものを作る。
+
+```text
+考える → AIに伝える → コード生成 → 実行 → エラー → 修正 → commit → push
+```
+
+重要なのはコード生成ではなく、**仮説から実装、実行、改善までを自走すること**です。
+
+### 2. Agent Construction
+
+Agentをチャットボットではなく、目的を持って判断し、道具を使い、結果を残す主体として設計する。
+
+```text
+Intent
+  ↓
+Agent
+  ↓
+Tool
+  ↓
+Workflow
+  ↓
+Execution
+  ↓
+Evidence / Outcome
+```
+
+Repository、Intent、Tool、Workflow、Evidenceを組み合わせ、実際に動くAgentシステムへ落とし込む。
+
+### 3. Ontology Design
+
+AIに何をさせるかだけでなく、**対象となる世界をどう定義するか**を設計する。
+
+```text
+Entity
+ ├─ Concept
+ ├─ Actor
+ ├─ Goal
+ ├─ Intent
+ ├─ Tool
+ ├─ Agent
+ ├─ Workflow
+ ├─ Evidence
+ └─ Outcome
+```
+
+さらに、概念間の関係を明示する。
+
+- `defines`
+- `provides`
+- `consumes`
+- `observes`
+- `analyzes`
+- `plans`
+- `generates`
+- `executes`
+- `produces`
+- `verifies`
+- `coordinates`
+
+## 職能モデル
+
+> **Vibe Coding × Agent Construction × Ontology Design**
+
+AIを使ってコードを書く、Agentを構築する、そして「何をどう定義するか」を設計する。この3つを分離せず、一つの実践的な職能として扱う。
+
+```text
+現場の課題
+   ↓
+Problem
+   ↓
+Ontology — 意味・対象・関係
+   ↓
+Intent — 目的・制約
+   ↓
+Agent — 判断・計画
+   ↓
+Tool — 道具・能力
+   ↓
+Workflow
+   ↓
+Execution
+   ↓
+Evidence
+   ↓
+Knowledge
+   ↓
+Ontology / Agent 更新
+```
+
+## Repository Engineering
+
+Repositoryを単なるソースコード置き場ではなく、**知識・定義・データ・Agent・Workflow・Evidenceを組織する基本単位**として扱う。
+
+```text
+Repository
+  ↓
+README / Code / Issues / Workflows
+  ↓
+Observed Facts
+  ↓
+Semantic Declaration
+  ↓
+Agent / Workflow
+  ↓
+Evidence
+```
+
+`bonsai/ecosystem.md` はRepositoryの意味と関係を宣言し、`bonsai/repos` はRepositoryの観測データを扱う。
 
 ## 求人文書の基本モデル
+
+求人を「応募する／しない」だけで終わらせず、職業を知識グラフの入口として扱う。
 
 ```text
 求人票
@@ -14,192 +127,153 @@
 仕事内容
   ↓
 必要な能力
-  ├─ 知識
-  ├─ 技術
-  ├─ 道具
-  ├─ 資格
-  └─ 現場経験
+ ├─ Knowledge
+ ├─ Skill
+ ├─ Tool
+ ├─ Qualification
+ └─ Experience
   ↓
-仕事の実態
+実際の仕事
   ↓
-学習項目
+Evidence
   ↓
-知識・経験の蓄積
+Knowledge
   ↓
 次の仕事
 ```
 
-求人を「応募する／しない」だけで終わらせず、**職業を知識グラフの入口**として扱います。
-
-## 目的
-
-- 求人文書を構造化する
-- 職種・業務・スキル・資格・道具を分離する
-- 求人と実際の仕事の差を記録する
-- 仕事から学習項目を抽出する
-- 複数求人から共通スキルを発見する
-- キャリアを「求人の集合」ではなく「知識の成長」として捉える
-
-## 求人資料のスキーマ
+## 求人資料スキーマ
 
 ```yaml
 job:
   title: "職種名"
   employer: "企業"
-  location: "勤務地"
-
   work:
     - task: "具体的な業務"
-      frequency: "daily"
       context: "現場・顧客・設備など"
-
   knowledge:
     - domain: "業務知識"
-      level: "required"
-
   skills:
     - name: "技能"
-      level: "required"
-
   tools:
     - name: "使用する道具"
-      category: "software | hardware | equipment | service"
-
   qualifications:
     - name: "資格"
-      required: false
-
   experience:
     - years: 3
       domain: "関連業務"
-
-  learning:
-    - topic: "入社前に学ぶこと"
-    - topic: "入社後に学ぶこと"
-
   evidence:
     - source: "求人文書"
-      observed_at: "YYYY-MM-DD"
 ```
 
-## 仕事を5つに分解する
-
-求人を見るときは、最低限次の5要素に分解します。
-
-| 要素 | 問い |
-|---|---|
-| Work | 実際に何をするか？ |
-| Knowledge | 何を知っている必要があるか？ |
-| Skill | 何ができる必要があるか？ |
-| Tool | 何を使うのか？ |
-| Evidence | その要求は何に基づくのか？ |
-
-この分離により、**「経験年数」と「本当に必要な能力」を分離**できます。
-
-## Bonsai ecosystemとの関係
-
-`mushochika` は求人・仕事を扱うドメイン資料です。
+## 宣言と観測を分離する
 
 ```text
-bonsai/ecosystem.md
-        │
-        │ semantic definitions
-        ▼
-   mushochika
-        │
-        ├── Job
-        ├── Work
-        ├── Skill
-        ├── Knowledge
-        ├── Tool
-        ├── Qualification
-        └── Evidence
+求人票          = declared requirement
+実際の仕事内容  = observed work
+応募者の能力    = candidate evidence
+入社後の経験    = experience evidence
 ```
 
-`mushochika` 自身が基盤Ontologyを再定義するのではなく、`intent`、`world-ontology`、`ecosystem` の定義を利用して、**求人・職業領域を専門化**します。
+求人の記載と実際の仕事の差分も、次の知識になります。
 
 ## 無尽知化
 
-ここでいう無尽知化とは、仕事を経験するたびに知識を消費するのではなく、
-
-> **仕事 → 経験 → 記録 → 構造化 → 知識 → 次の仕事**
-
-という循環を作ることです。
+仕事を経験して終わりにせず、経験を次の仕事で使える知識へ変換する。
 
 ```text
-              ┌──────────────┐
-              │    求人      │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │    仕事      │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │    経験      │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │    記録      │
-              └──────┬───────┘
-                     ↓
-              ┌──────────────┐
-              │    知識      │
-              └──────┬───────┘
-                     │
-                     └──────→ 次の求人
+仕事
+ ↓
+経験
+ ↓
+コード / Repository
+ ↓
+Evidence
+ ↓
+Ontology
+ ↓
+Knowledge
+ ↓
+Agent
+ ↓
+次の仕事
+ ↺
 ```
 
-## 求人資料としての利用
+> **経験を消費して終わらせず、次の仕事に使える知識へ変換する。**
 
-求人文書は、以下の用途に使えます。
+これが `mushochika` の中心思想です。
 
-1. **応募判断** — 自分の能力と求人要求を比較する
-2. **職種研究** — 同じ職種の複数求人を比較する
-3. **学習計画** — 不足している知識・技能を抽出する
-4. **キャリア設計** — 次に獲得すべき能力を決める
-5. **企業研究** — 企業が現場で何を要求しているかを見る
-6. **エージェント支援** — 求人と人材の意味的マッチングに利用する
+## 求める人材像
 
-## データの原則
+### Builder
 
-求人情報には「宣言」と「観測」を混在させません。
+仕様を待つだけではなく、自分で仮説を立て、AIを使い、動くものまで持っていける。
+
+### Agent Engineer
+
+Agent、Tool、Workflowの境界を理解し、複数のAgentや道具を組み合わせられる。
+
+### Ontology Engineer
+
+曖昧な要求を概念・属性・関係・制約に分解し、人間と機械の双方が扱える定義にできる。
+
+### Field Engineer
+
+現場の問題から出発し、技術を目的化せず、成果につながる手段として選択できる。
+
+## 技術は手段
+
+特定の言語やモデルの暗記を職能の中心に置かない。
 
 ```text
-求人票の記載       = declared requirement
-実際の仕事内容     = observed work
-応募者の能力       = candidate evidence
-入社後の経験       = experience evidence
+Language / Framework / LLM / Database / API
+                    ↓
+                   Tool
+                    ↓
+               Capability
+                    ↓
+                 Intent
+                    ↓
+                 Outcome
 ```
 
-これらを分離することで、求人票と実際の仕事の差分も知識になります。
+言語、LLM、DB、Workflow engineなどは交換可能な道具として扱う。
 
-## 将来のagent利用
+## 求人と能力の接続
 
 ```text
-Job Document
-     ↓
-Parser
-     ↓
-Job Schema
-     ↓
-Ontology mapping
-     ↓
-Skill / Knowledge graph
-     ↓
-Candidate profile
-     ↓
-Gap analysis
-     ↓
-Learning plan
-     ↓
-Career agent
+求人票
+  ↓
+Job Ontology
+  ↓
+Required Skills
+  ↓
+Tools / Methods / Knowledge
+  ↓
+Candidate Evidence
+  ↓
+Skill Gap
+  ↓
+Learning / Assignment
 ```
 
-Agentは求人の意味を勝手に変更するのではなく、宣言された求人要件と蓄積された証拠を比較して支援します。
+「AI経験あり」ではなく、**何を作り、何を定義し、何を実行し、どんなEvidenceを残したか**で能力を評価する。
 
-## Core principle
+## 関連Repository
 
-> **求人は仕事の入口であり、仕事は知識を増やす入口である。**
+- `bonsai/ecosystem.md` — Repositoryの意味・関係
+- `bonsai/intent` — Intent Ontology
+- `bonsai/world-ontology` — 世界・対象のOntology
+- `bonsai/repos` — Repository観測データ
+- `bonsai/agent` — Agent
+- `bonsai/soshiki` — Agent組織
+- `bonsai/aw` — Agentic Workflow
+- `bonsai/yaml-as-agent` — 宣言的Agent
+- `bonsai/ds-agent` — データ分析・Evidence
 
-`mushochika` は、求人文書をキャリアと知識の成長につなげるための資料基盤です。
+## Positioning
+
+> **AIを使ってコードを書く人から、AIとともに意味・Agent・組織・仕事そのものを設計する人へ。**
+
+`mushochika` は、この実践的な職能と求人を接続するための資料基盤です。
