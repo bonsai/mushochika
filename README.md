@@ -97,6 +97,33 @@ Knowledge
 Ontology / Agent 更新
 ```
 
+## Repository構成
+
+Speech系と、それ以外の職能・Evidence系を分離する。
+
+```text
+mushochika/
+├─ speech/                  # Speech・発話・音声系
+│  └─ README.md
+├─ docs/                    # 求人・職能・Evidenceの説明資料
+│  └─ evidence/
+│     └─ 2026-H1-development.md
+├─ data/                    # Evidenceの構造化データ
+│  └─ evidence/
+│     └─ 2026-H1-development-stats.json
+└─ README.md               # mushochika全体の定義
+```
+
+### Speech
+
+Speechは独立領域として`speech/`に置く。音声・発話・Speech固有の実験や資料はここに集約し、求人・職能・Evidenceの本体とは混ぜない。
+
+### Speech以外
+
+`mushochika`の中心はSpeechではなく、**Job / Evidence / Capability / Knowledge / Ontology / Agent**。
+
+Repository上の開発履歴、Commit、Issue、Workflow、ArtifactなどをEvidenceとして扱い、職能へ接続する。
+
 ## Repository Engineering
 
 Repositoryを単なるソースコード置き場ではなく、**知識・定義・データ・Agent・Workflow・Evidenceを組織する基本単位**として扱う。
