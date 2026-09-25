@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3分スピーチ練習 — 音声同期カラオケ</title>
+<style>
+  :root{
+    --bg:#f7f4ec; --paper:#fffdf6; --ink:#1a1a1a;
+    --dim:#b9b2a2; --lit:#d98e04; --accent:#8a5a00;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    display:flex; flex-direction:column; min-height:100vh;
+  }
+  header{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding:14px 24px; border-bottom:1px solid #e3dccb;
+    background:var(--paper);
+  }
+  h1{font-size:15px; font-weight:600; margin:0; letter-spacing:.05em}
+  .timer{
+    font-variant-numeric:tabular-nums;
+    font-family:"SF Mono",Menlo,Consolas,monospace;
+    font-size:34px; font-weight:700; color:var(--accent);
+  }
+  .timer.warn{color:#c0392b}
+  .controls{display:flex; gap:8px; align-items:center}
+  button{
+    font:inherit; border:1px solid #cbbf9f; background:#f3ecdb;
+    border-radius:6px; padding:3px 10px; cursor:pointer; color:#4a3a10;
+  }
+  button:hover{background:#e8ddc2}
+  button.primary{background:#8a5a00; border-color:#8a5a00; color:#fff}
+  select{font:inherit; border:1px solid #cbbf9f; border-radius:6px; background:#f3ecdb; color:#4a3a10}
+  main{
+    flex:1; width:min(860px,94vw); margin:0 auto; padding:34px 8px 110px;
+    font-size:30px; line-height:2.0; letter-spacing:.03em;
+  }
+  .sec{
+    margin:10px 0 14px; font-size:15px; color:#9a8f6f; letter-spacing:.2em;
+    font-family:"Hiragino Kaku Gothic ProN",sans-serif;
+  }
+  .line{color:var(--dim)}
+  .line .ch{color:inherit; transition:color .12s}
+  .line .ch.done{color:#1a1a1a}
+  .line.dimmed{opacity:.55; transition:opacity .4s}
+  .cursor{
+    background:var(--lit); color:#fffdf6 !important; border-radius:3px;
+    box-shadow:0 0 6px rgba(217,142,4,.5);
+  }
+  footer{
+    position:fixed; inset:auto 0 0 0; background:var(--paper);
+    border-top:1px solid #e3dccb; padding:8px 24px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:13px; color:#7a7158;
+    font-family:"Hiragino Kaku Gothic ProN",sans-serif;
+  }
+  .bar{flex:1; height:4px; background:#e6decc; border-radius:2px; margin:0 18px}
+  .bar i{display:block; height:100%; width:0%; background:var(--lit); border-radius:2px}
+  .note{color:#7a7158}
+  .synced{border:1px solid #b5d8b5; background:#e9f6e9; border-radius:4px; padding:0 6px; color:#2f6b2f}
+</style>
+</head>
+<body>
+<header>
+  <h1>3分スピーチ練習　—「前職で力を入れたこと」</h1>
+  <div class="timer" id="timer">3:00</div>
+</header>
+
+<main id="main"></main>
+
+<footer>
+  <div class="controls">
+    <button id="start" class="primary">▶ 再生</button>
+    <button id="reset">リセット</button>
+    <span class="note" id="mode"></span>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div><span id="pos">0</span> / <span id="tot">0</span> 字　<span id="hint">Space=再生/一時停止・R=リセット</span></div>
+</footer>
+
+<script>
+const PARAS = [{"t": "みなさん、こんにちは。今日のテーマは、「わたしが前職で力を入れたこと」です。"}, {"t": "正直に言うと、このテーマに対して、以前の私は後ろ向きでした。思い出せるのは、与えられた仕事をこなし、責任を果たして終わる自分だけ。胸を張って「ここに力を入れた」と言える場面が、見つからなかったんです。"}, {"t": "ところが、AI に触れるようになって、考え方が変わりました。AI を道具として使うことで、自分の経験を、前向きに捉えられるようになった。 そのきっかけを、今日はお話しします。"}, {"t": "このテーマには、ずっと取り組んできました。それでも、全貌をすぐに思い出すことはできませんでした。"}, {"t": "そこで僕は、「自分が何をしてきたのか」を分析するツールを作ることにしました。"}, {"t": "やり方はこうです。指示文を含むセッションの記録と、成果物のコードを、DB に突っ込んで、ML で計算しました。"}, {"t": "すると、結果が出ました。僕が取り組んできたのは、環境整備と、エージェント基盤づくりでした。自分が何に時間を使ってきたのかが、数字として初めて見えたんです。"}, {"t": "この経験で気づきました。AI は、人間の苦手なことを補ってくれる、すばらしい伴侶です。 記憶が曖昧な僕に代わって、記録から事実を引き出してくれる。そんな道具が、もう手の中にあります。"}, {"t": "企業に就職できなくても、個人開発なら、自分で好きな開発を続けていける。そう思えるから、これからも頑張って行きたいです。"}, {"t": "この分析ツールは、「ムショチカ」という名前でリポジトリを作り、公開してあります。"}, {"t": "ご清聴ありがとうございました。"}];
+const TOTAL = PARAS.reduce((a,p)=>a+(p.t?p.t.length:0),0);
+document.getElementById("tot").textContent = TOTAL;
+
+const main = document.getElementById("main");
+const spans = [];
+let cursorEl = null;
+
+for (const p of PARAS){
+  if (p.h){
+    const s = document.createElement("div");
+    s.className = "sec"; s.textContent = p.h;
+    main.appendChild(s);
+  } else if (p.t){
+    const line = document.createElement("div");
+    line.className = "line";
+    for (const ch of p.t){
+      const sp = document.createElement("span");
+      sp.className = "ch"; sp.textContent = ch;
+      line.appendChild(sp);
+      spans.push({el:sp, line});
+    }
+    main.appendChild(line);
+  }
+}
+
+const timerEl = document.getElementById("timer");
+const barEl = document.getElementById("bar");
+const posEl = document.getElementById("pos");
+const modeEl = document.getElementById("mode");
+const audio = new Audio();
+audio.preload = "auto";
+audio.src = "speech-3min-analyze.mp3";
+
+let useAudio = false;   // 音声ロード成功でtrue
+let duration = 180, raf = 0, running = false, startedAt = 0, audioStartOffset = 0;
+
+function fmt(s){ s=Math.max(0,Math.ceil(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+
+audio.addEventListener("loadedmetadata", ()=>{
+  useAudio = true;
+  duration = audio.duration;
+  modeEl.innerHTML = '<span class="synced">音声同期</span> ' + fmt(duration);
+  timerEl.textContent = fmt(duration);
+  barEl.style.width = "0%";
+});
+audio.addEventListener("error", ()=>{
+  modeEl.textContent = "音声なし(時間送り)";
+});
+audio.addEventListener("ended", finish);
+
+function render(prog){
+  const i = Math.max(0, Math.min(TOTAL-1, Math.floor(prog*TOTAL)));
+  for (let k=0;k<spans.length;k++){
+    const st = spans[k];
+    if (k<i) st.el.className = "ch done";
+    else if (k===i){ st.el.className = "ch cursor"; cursorEl = st; }
+    else st.el.className = "ch";
+  }
+  posEl.textContent = i+1;
+  if (cursorEl){
+    for (const st of spans){
+      if (st.line===cursorEl.line) st.line.classList.remove("dimmed");
+      else st.line.classList.add("dimmed");
+    }
+    cursorEl.line.scrollIntoView({block:"center", behavior:"smooth"});
+  }
+}
+
+function tick(ts){
+  if (!running) return;
+  let prog, remain;
+  if (useAudio){
+    prog = audio.duration ? audio.currentTime/audio.duration : 0;
+    remain = audio.duration - audio.currentTime;
+  } else {
+    if (!startedAt) startedAt = ts;
+    prog = Math.min(1,(ts-startedAt)/1000/duration);
+    remain = duration - prog*duration;
+  }
+  timerEl.textContent = fmt(remain);
+  timerEl.classList.toggle("warn", remain<=30);
+  barEl.style.width = (Math.min(1,prog)*100).toFixed(2)+"%";
+  render(prog);
+  if (remain<=0){ timerEl.textContent="0:00"; finish(); return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function start(){
+  if (running) return;
+  running = true;
+  if (useAudio){
+    if (audio.ended || audio.currentTime>=audio.duration-0.05) audio.currentTime = 0;
+    audio.play();
+  } else startedAt = 0;
+  raf = requestAnimationFrame(tick);
+  document.getElementById("start").textContent = "⏸ 一時停止";
+}
+function pause(){
+  if (!running) return;
+  running = false; cancelAnimationFrame(raf);
+  if (useAudio) audio.pause();
+  document.getElementById("start").textContent = "▶ 再生";
+}
+function reset(){
+  running = false; cancelAnimationFrame(raf);
+  if (useAudio){ audio.pause(); audio.currentTime = 0; }
+  timerEl.textContent = fmt(useAudio?audio.duration:duration);
+  timerEl.classList.remove("warn");
+  barEl.style.width = "0%"; posEl.textContent = "0";
+  for (const st of spans){ st.el.className="ch"; st.line.classList.remove("dimmed"); }
+  cursorEl = null;
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function finish(){
+  running = false;
+  document.getElementById("start").textContent = "▶ 再生";
+  for (const st of spans){ st.el.className="ch done"; st.line.classList.remove("dimmed"); }
+  posEl.textContent = TOTAL;
+}
+function toggle(){ running ? pause() : start(); }
+
+document.getElementById("start").addEventListener("click", toggle);
+document.getElementById("reset").addEventListener("click", reset);
+document.addEventListener("keydown", e=>{
+  if (e.code==="Space"){ e.preventDefault(); toggle(); }
+  if (e.code==="KeyR") reset();
+});
+
+reset();
+</script>
+</body>
+</html>
