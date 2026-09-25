@@ -1,46 +1,53 @@
 {
   "period": "2026-H1",
-  "range": [
-    "2026-01-01",
-    "2026-06-30"
-  ],
-  "query": "author:bonsai committer-date:YYYY-MM-DD..YYYY-MM-DD",
-  "method": "GitHub commit search; capped result sets are treated as lower bounds",
-  "monthly": [
-    {
-      "month": "2026-01",
-      "observed_commits": 35,
-      "lower_bound": true
+  "quarters": {
+    "Q1": {
+      "period": [
+        "2026-01-01",
+        "2026-03-31"
+      ],
+      "observed_commits_lower_bound": 236,
+      "monthly": [
+        {
+          "month": "2026-01",
+          "observed_commits": 35
+        },
+        {
+          "month": "2026-02",
+          "observed_commits": 120,
+          "lower_bound": true
+        },
+        {
+          "month": "2026-03",
+          "observed_commits": 81
+        }
+      ]
     },
-    {
-      "month": "2026-02",
-      "observed_commits": 120,
-      "lower_bound": true,
-      "detail": "100 in Feb 1-14 + 20 in Feb 15-28"
-    },
-    {
-      "month": "2026-03",
-      "observed_commits": 81,
-      "lower_bound": false
-    },
-    {
-      "month": "2026-04",
-      "observed_commits": 64,
-      "lower_bound": false
-    },
-    {
-      "month": "2026-05",
-      "observed_commits": 200,
-      "lower_bound": true,
-      "detail": "100 in May 1-15 + 100 in May 16-31"
-    },
-    {
-      "month": "2026-06",
-      "observed_commits": 200,
-      "lower_bound": true,
-      "detail": "100 in Jun 1-15 + 100 in Jun 16-30"
+    "Q2": {
+      "period": [
+        "2026-04-01",
+        "2026-06-30"
+      ],
+      "observed_commits_lower_bound": 464,
+      "monthly": [
+        {
+          "month": "2026-04",
+          "observed_commits": 64
+        },
+        {
+          "month": "2026-05",
+          "observed_commits": 200,
+          "lower_bound": true
+        },
+        {
+          "month": "2026-06",
+          "observed_commits": 200,
+          "lower_bound": true
+        }
+      ]
     }
-  ],
-  "h1_observed_lower_bound": 700,
-  "caveat": "Actual totals may be higher because some GitHub search windows reached the result cap."
+  },
+  "h1_observed_commits_lower_bound": 700,
+  "method": "GitHub commit search by author:bonsai and committer-date ranges",
+  "caveat": "February, May and June reached the search result cap; quarterly and H1 totals are lower bounds."
 }
